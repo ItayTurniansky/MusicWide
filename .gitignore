@@ -1,0 +1,15 @@
+# Binaries
+main
+*.exe
+*.dll
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Environment variables (Never upload secrets!)
+.env
