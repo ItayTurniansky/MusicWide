@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: musicwide-db
+    restart: always
+    environment:
+      # ${VAR_NAME} tells Docker to look in the .env file
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: musicwide-api
+    ports:
+      - "8080:8080"
+    environment:
+      # The app reads the full connection string
+      DB_SOURCE: ${DB_SOURCE}
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
