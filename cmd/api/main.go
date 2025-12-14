@@ -1,49 +1,36 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+
+	"github.com/joho/godotenv"
 
 	"github.com/ItayTurniansky/musicwide/internal/server"
-	// 1. ADD THIS IMPORT (The generated code)
-	db "github.com/ItayTurniansky/musicwide/db/sqlc"
-
-	_ "github.com/lib/pq"
+	"github.com/ItayTurniansky/musicwide/internal/service"
 )
 
 func main() {
-	// 1. Get the connection string
-	dbSource := os.Getenv("DB_SOURCE")
-	if dbSource == "" {
-		dbSource = "postgresql://admin:secretpassword@localhost:5432/musicwide?sslmode=disable"
-	}
-
-	// 2. Open the connection
-	conn, err := sql.Open("postgres", dbSource)
+	// 1. Load Environment Variables
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		log.Println("Warning: .env file not found")
 	}
 
-	// 3. Ping to verify
-	if err := conn.Ping(); err != nil {
-		log.Fatal("database is not responding:", err)
+	// 2. Initialize the Music Service
+	musicService, err := service.NewMusicService()
+	if err != nil {
+		log.Fatal(" Failed to start Music Service:", err)
 	}
+	fmt.Println(" Music Service Initialized!")
 
-	fmt.Println("Successfully connected to the Database!")
-
-	// 4. PREPARE THE DATABASE OBJECT (This is the missing link!)
-	// We wrap the raw connection 'conn' with the generated code 'db.New'
-	database := db.New(conn)
-
-	// 5. START THE SERVER
-	// Pass the 'database' object into NewServer
-	s := server.NewServer(database)
+	// 3. Start the Server
+	// Notice: We don't pass a database anymore, just the service
+	s := server.NewServer(musicService)
 
 	port := "8080"
-	fmt.Printf("MusicWide Server running on port %s\n", port)
+	fmt.Printf(" MusicWide Server running on http://localhost:%s\n", port)
 
 	if err := http.ListenAndServe(":"+port, s.Router); err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))
