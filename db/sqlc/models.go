@@ -8,11 +8,14 @@ import (
 	"time"
 )
 
-type User struct {
-	ID           int64     `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	FullName     string    `json:"full_name"`
-	CreatedAt    time.Time `json:"created_at"`
+type Song struct {
+	ID         int64     `json:"id"`
+	Isrc       string    `json:"isrc"`
+	Title      string    `json:"title"`
+	Artist     string    `json:"artist"`
+	SpotifyUrl string    `json:"spotify_url"`
+	AppleUrl   string    `json:"apple_url"`
+	DeezerUrl  string    `json:"deezer_url"`
+	YoutubeUrl string    `json:"youtube_url"`
+	CreatedAt  time.Time `json:"created_at"`
 }
