@@ -1,44 +1,42 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 
+	// Ensure these import paths are correct for your project structure
 	"github.com/ItayTurniansky/musicwide/internal/server"
 	"github.com/ItayTurniansky/musicwide/internal/service"
 )
 
 func main() {
-	// 1. Load Environment Variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found")
+	// 1. Load Environment Variables (.env is used for local development only)
+	if err := godotenv.Load(); err != nil {
+		log.Println("Note: .env file not found or failed to load. Using system environment variables.")
 	}
 
 	// 2. Initialize the Music Service
 	musicService, err := service.NewMusicService()
 	if err != nil {
-		log.Fatal(" Failed to start Music Service:", err)
+		log.Fatal("Failed to start Music Service:", err)
 	}
-	fmt.Println(" Music Service Initialized!")
+	log.Println("Music Service Initialized!")
 
 	// 3. Start the Server
 	s := server.NewServer(musicService)
 
+	// Get the PORT from the environment (used by Render), defaulting to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-	fmt.Printf(" MusicWide Server running on http://localhost:%s\n", port)
+	log.Printf("Server starting on :%s (Public URL will be provided by Render)", port)
 
-	if err := http.ListenAndServe(":"+port, s.Router); err != nil {
-		panic(fmt.Sprintf("cannot start server: %s", err))
-	}
-
+	// Corrected ListenAndServe: This single line starts the server using
+	// the custom router (s.Router) and logs a fatal error if it fails.
+	log.Fatal(http.ListenAndServe(":"+port, s.Router))
 }
