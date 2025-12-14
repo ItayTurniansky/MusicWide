@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 
@@ -26,13 +27,18 @@ func main() {
 	fmt.Println(" Music Service Initialized!")
 
 	// 3. Start the Server
-	// Notice: We don't pass a database anymore, just the service
 	s := server.NewServer(musicService)
 
-	port := "8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 	fmt.Printf(" MusicWide Server running on http://localhost:%s\n", port)
 
 	if err := http.ListenAndServe(":"+port, s.Router); err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))
 	}
+
 }
