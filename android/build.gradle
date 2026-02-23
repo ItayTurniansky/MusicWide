@@ -1,0 +1,51 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+// --- THE SMART FIX ---
+subprojects {
+    def configureJavaVersion = {
+        // 1. Apply Java 21 to ALL Android projects (Java or Kotlin)
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_21
+                    targetCompatibility JavaVersion.VERSION_21
+                }
+            }
+        }
+
+        // 2. Apply Kotlin 21 ONLY if the project uses Kotlin
+        if (project.plugins.hasPlugin("kotlin-android")) {
+            project.android {
+                kotlinOptions {
+                    jvmTarget = "21"
+                }
+            }
+        }
+    }
+
+    // Run this logic safely
+    if (project.state.executed) {
+        configureJavaVersion()
+    } else {
+        project.afterEvaluate {
+            configureJavaVersion()
+        }
+    }
+}
